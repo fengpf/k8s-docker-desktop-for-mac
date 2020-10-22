@@ -1,3 +1,8 @@
 .DS_Store
 .vscode/
 .idea/
+
+/go-grpc-client-side-lb-example/greeter_client/greeter_client
+/go-grpc-client-side-lb-example/greeter_server/greeter_server
+
+/prometheus/client/random

@@ -25,7 +25,7 @@ package backoff
 import (
 	"time"
 
-	"github.com/yangxikun/go-grpc-client-side-lb-example/internal/grpcrand"
+	"k8s-docker-desktop-for-mac/go-grpc-client-side-lb-example/internal/grpcrand"
 )
 
 // Strategy defines the methodology for backing off after a grpc connection

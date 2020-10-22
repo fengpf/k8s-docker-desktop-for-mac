@@ -7,8 +7,8 @@ import (
 	"log"
 	"time"
 
-	pb "github.com/yangxikun/go-grpc-client-side-lb-example/pb"
-	_ "github.com/yangxikun/go-grpc-client-side-lb-example/resolver/dns"
+	pb "k8s-docker-desktop-for-mac/go-grpc-client-side-lb-example/pb"
+	_ "k8s-docker-desktop-for-mac/go-grpc-client-side-lb-example/resolver/dns"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer/roundrobin"
 	_ "google.golang.org/grpc/health"

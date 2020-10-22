@@ -7,55 +7,17 @@ import (
 	"net"
 	"time"
 
-	pb "github.com/yangxikun/go-grpc-client-side-lb-example/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
+	pb "k8s-docker-desktop-for-mac/go-grpc-client-side-lb-example/pb"
 )
 
 const (
 	port = ":50051"
 )
-
-var stuckDuration time.Duration
-
-type healthServer struct{}
-
-func (h *healthServer) Check(ctx context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
-	log.Println("recv health check for service:", req.Service)
-	if stuckDuration == time.Second {
-		return &grpc_health_v1.HealthCheckResponse{Status: grpc_health_v1.HealthCheckResponse_NOT_SERVING}, nil
-	}
-	return &grpc_health_v1.HealthCheckResponse{Status: grpc_health_v1.HealthCheckResponse_SERVING}, nil
-}
-
-func (h *healthServer) Watch(req *grpc_health_v1.HealthCheckRequest, stream grpc_health_v1.Health_WatchServer) error {
-	log.Println("recv health watch for service:", req.Service)
-	resp := new(grpc_health_v1.HealthCheckResponse)
-	if stuckDuration == time.Second {
-		resp.Status = grpc_health_v1.HealthCheckResponse_NOT_SERVING
-	} else {
-		resp.Status = grpc_health_v1.HealthCheckResponse_SERVING
-	}
-	for range time.NewTicker(time.Second).C {
-		err := stream.Send(resp)
-		if err != nil {
-			return status.Error(codes.Canceled, "Stream has ended.")
-		}
-	}
-	return nil
-}
-
-// server is used to implement helloworld.GreeterServer.
-type server struct{}
-
-// SayHello implements helloworld.GreeterServer
-func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
-	time.Sleep(stuckDuration)
-	return &pb.HelloReply{Message: "Hello " + in.Name + "! From " + GetIP()}, nil
-}
 
 func main() {
 	// simulate busy server
@@ -101,4 +63,42 @@ func GetIP() string {
 		}
 	}
 	return ""
+}
+
+var stuckDuration time.Duration
+
+type healthServer struct{}
+
+func (h *healthServer) Check(ctx context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
+	log.Println("recv health check for service:", req.Service)
+	if stuckDuration == time.Second {
+		return &grpc_health_v1.HealthCheckResponse{Status: grpc_health_v1.HealthCheckResponse_NOT_SERVING}, nil
+	}
+	return &grpc_health_v1.HealthCheckResponse{Status: grpc_health_v1.HealthCheckResponse_SERVING}, nil
+}
+
+func (h *healthServer) Watch(req *grpc_health_v1.HealthCheckRequest, stream grpc_health_v1.Health_WatchServer) error {
+	log.Println("recv health watch for service:", req.Service)
+	resp := new(grpc_health_v1.HealthCheckResponse)
+	if stuckDuration == time.Second {
+		resp.Status = grpc_health_v1.HealthCheckResponse_NOT_SERVING
+	} else {
+		resp.Status = grpc_health_v1.HealthCheckResponse_SERVING
+	}
+	for range time.NewTicker(time.Second).C {
+		err := stream.Send(resp)
+		if err != nil {
+			return status.Error(codes.Canceled, "Stream has ended.")
+		}
+	}
+	return nil
+}
+
+// server is used to implement helloworld.GreeterServer.
+type server struct{}
+
+// SayHello implements helloworld.GreeterServer
+func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
+	time.Sleep(stuckDuration)
+	return &pb.HelloReply{Message: "Hello " + in.Name + "! From " + GetIP()}, nil
 }
